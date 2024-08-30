@@ -1,0 +1,18 @@
+{
+  "name": "clitask",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bin/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "clitask": "./bin/index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "dependencies": {
+    "yargs": "^17.7.2"
+  }
+}
