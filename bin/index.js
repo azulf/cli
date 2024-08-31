@@ -26,7 +26,9 @@ program
 			let data = [];
 			fs.readFile(filePath, 'utf-8',(err, previousData) => {
 				if (!err && previousData) {
-					console.log(previousData);
+					// data = JSON.parse(previousData);
+					data.push(previousData);
+					console.log(data);
 					try {
 						data = JSON.parse(previousData);
 					} catch (error) {
@@ -41,8 +43,10 @@ program
 		}
 
 		data = fs.readFileSync(filePath, 'utf8');
+
+		console.log(data);
 		let notes = JSON.parse(opsi);
-		fs.writeFileSync(filePath, JSON.stringify(notes));
+		fs.writeFileSync(filePath, JSON.stringify(notes, null, 2));
 		console.log(`New task added :  ${(options)} !`);
 	})
 	.option('-d, --done', 'done a task')
