@@ -4,6 +4,7 @@ const timers = require('node:timers');
 const readline = require('readline');
 const path = require('path');
 const { timeStamp } = require('console');
+const { program } = require('commander');
 
 const filePath = path.join(__dirname, "notes.json");
 
@@ -13,28 +14,36 @@ const input = readline.createInterface({
 	output : process.stdout
 });
 
+
+/**
+ * Membaca file notes.json dan menambahkan catatan ke dalamnya.
+ * Jika file notes.json tidak ada, maka akan dibuatkan.
+ * Jika file notes.json ada maka akan di parse dan di tambahkan notes
+ * Jika terjadi error maka akan di tampilkan ke layar.
+ */
 function saveNote(notes) {
-	// cek apakah file sudah ada
-	fs.readFile(filePath, 'utf-8', (err, notes) => {
-		if (err && err.code !== 'ENOENT'){
+	// cek apakah file sudah 
+
+	fs.readFile(filePath, 'utf8', (err, notes) => {
+		// cek apakah terjadi error
+		if (err && err.code !== 'ENOENT') {
 			console.error('Gagal Membaca File', err);
 			return;
 		}
-
 		let data = [];
 		if (!err && notes) {
-			// parse data jika file sudah ada dan memiliki isi
+			// parsing
 			try {
 				data = JSON.parse(notes);
 			} catch (parseErr) {
-				console.error('gagal memparsing file json: ', parseErr);
+				console.error('Gagal memparsing file json: ', parseErr);
 				return;
 			}	
 		}
 		data.push(notes);
 		let jsonStrings;
 		try {
-			jsonStrings = JSON.stringify(data,notes,2);
+			jsonStrings = JSON.stringify(data,null,2);
 		}	catch(stringifyErr) {
 				console.error('Error mengonversi catatan ke JSON : ', stringifyErr);
 				return;
@@ -47,6 +56,7 @@ function saveNote(notes) {
 				} 	else {
 					console.log('Catatan berhasil disimpan');
 				}
+
 				input.close();
 	});
 });
