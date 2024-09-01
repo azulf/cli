@@ -20,15 +20,16 @@ program
 
 program
 	.option('-a, --add <options>', 'add a task',(options) => {
-		let opsi = JSON.stringify(options);
+		const argv = process.argv.slice(4);
+		const arg = argv.join(' ');
+		console.log(arg)
+		let opsi = JSON.stringify(arg);
 		// cek isi file
 		if (fs.existsSync(filePath)) {
 			let data = [];
 			fs.readFile(filePath, 'utf-8',(err, previousData) => {
 				if (!err && previousData) {
 					// data = JSON.parse(previousData);
-					data.push(previousData);
-					console.log(data);
 					try {
 						data = JSON.parse(previousData);
 					} catch (error) {
@@ -43,17 +44,31 @@ program
 		}
 
 		data = fs.readFileSync(filePath, 'utf8');
-
-		console.log(data);
-		let notes = JSON.parse(opsi);
-		fs.writeFileSync(filePath, JSON.stringify(notes, null, 2));
-		console.log(`New task added :  ${(options)} !`);
+		if (!data) {
+			data = fs.writeFileSync(filePath, `[${opsi}]`);
+		} else {
+			let prevdata = [];
+			prevdata = JSON.parse(data);
+			let notes = JSON.parse(opsi);
+			prevdata.push(notes);
+			notes = prevdata;
+			fs.writeFileSync(filePath, JSON.stringify(notes, null, 2));
+		}
+		
+		
+		console.log(`New task added :  ${(arg)} !`);
 	})
 	.option('-d, --done', 'done a task')
 	.option('-l, --list', 'list all tasks', () => {
 		let data = fs.readFileSync(filePath, 'utf8');
-		let notes = JSON.parse(data);
-		console.log(notes);
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		}
+		else{
+			let notes = JSON.parse(data);
+			console.log(notes);
+		}
+	
 	})
 	.option('-u, --update', 'update a task');
 
