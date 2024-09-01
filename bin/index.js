@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 const fs = require('fs');
-const timers = require('node:timers');
 const readline = require('readline');
 const path = require('path');
 const { timeStamp } = require('console');
+const { program } = require('commander');
 
 const filePath = path.join(__dirname, "notes.json");
 
@@ -13,64 +13,64 @@ const input = readline.createInterface({
 	output : process.stdout
 });
 
-function saveNote(notes) {
-	// cek apakah file sudah ada
-	fs.readFile(filePath, 'utf-8', (err, notes) => {
-		if (err && err.code !== 'ENOENT'){
-			console.error('Gagal Membaca File', err);
-			return;
-		}
+program
+	.version('1.0.0')
+	.command('task')
+	.description('Add a task')
 
-		let data = [];
-		if (!err && notes) {
-			// parse data jika file sudah ada dan memiliki isi
-			try {
-				data = JSON.parse(notes);
-			} catch (parseErr) {
-				console.error('gagal memparsing file json: ', parseErr);
-				return;
-			}	
-		}
-		data.push(notes);
-		let jsonStrings;
-		try {
-			jsonStrings = JSON.stringify(data,notes,2);
-		}	catch(stringifyErr) {
-				console.error('Error mengonversi catatan ke JSON : ', stringifyErr);
-				return;
-			}
-
-	//tambahkan catatan pada notes 
-		fs.writeFile(filePath, jsonStrings, (err) => {
-				if (err) {
-					console.log("Gagal Menyimpan Catatan", err);
-				} 	else {
-					console.log('Catatan berhasil disimpan');
+program
+	.option('-a, --add <options>', 'add a task',(options) => {
+		const argv = process.argv.slice(4);
+		const arg = argv.join(' ');
+		console.log(arg)
+		let opsi = JSON.stringify(arg);
+		// cek isi file
+		if (fs.existsSync(filePath)) {
+			let data = [];
+			fs.readFile(filePath, 'utf-8',(err, previousData) => {
+				if (!err && previousData) {
+					// data = JSON.parse(previousData);
+					try {
+						data = JSON.parse(previousData);
+					} catch (error) {
+						console.log(error);
+						return;
+					}
 				}
-				input.close();
-	});
-});
-}
+			})
 
-const args = process.argv.slice(2);
-
-if (args.length > 0) {
-	const command = args[0];
-
-	const noteText = args.slice(1).join('');
-	if (command === 'add')
-		if (noteText) {
-
-			saveNote({
-				text : noteText,
-				timestamp : new Date().toISOString()
-			});
 		} else {
-			console.log('Harap masukkan catatan setelah perintah add');
+			fs.writeFileSync(filePath, '[]');
 		}
-	else {
-		console.log("harus menambahkan add");
-	}
-} else {
-	console.log("minimal banget pake 'add'");
-}
+
+		data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			data = fs.writeFileSync(filePath, `[${opsi}]`);
+		} else {
+			let prevdata = [];
+			prevdata = JSON.parse(data);
+			let notes = JSON.parse(opsi);
+			prevdata.push(notes);
+			notes = prevdata;
+			fs.writeFileSync(filePath, JSON.stringify(notes, null, 2));
+		}
+		
+		
+		console.log(`New task added :  ${(arg)} !`);
+	})
+	.option('-d, --done', 'done a task')
+	.option('-l, --list', 'list all tasks', () => {
+		let data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		}
+		else{
+			let notes = JSON.parse(data);
+			console.log(notes);
+		}
+	
+	})
+	.option('-u, --update', 'update a task');
+
+program.parse(process.argv);
+input.close();
