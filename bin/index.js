@@ -4,8 +4,11 @@ const readline = require('readline');
 const path = require('path');
 const { timeStamp } = require('console');
 const { program } = require('commander');
+const { argv } = require('process');
+const { parseArgs } = require('util');
 
 const filePath = path.join(__dirname, "notes.json");
+
 
 // input readline
 const input = readline.createInterface({
@@ -15,51 +18,47 @@ const input = readline.createInterface({
 
 program
 	.version('1.0.0')
-	.command('task')
+	.command('add <idn> <task>')
 	.description('Add a task')
-
-program
-	.option('-a, --add <options>', 'add a task',(options) => {
-		const argv = process.argv.slice(4);
-		const arg = argv.join(' ');
-		console.log(arg)
-		let opsi = JSON.stringify(arg);
-		// cek isi file
+	.action((idn,task) => {
+		const task_array = {
+			id: idn,
+			taskDesc : task,
+			status: 'todo',
+			createdAt: new Date().toISOString(),
+			updatedAt: null,
+			completed: false
+		};
+		let data = [] ;
 		if (fs.existsSync(filePath)) {
-			let data = [];
+			
 			fs.readFile(filePath, 'utf-8',(err, previousData) => {
 				if (!err && previousData) {
-					// data = JSON.parse(previousData);
 					try {
-						data = JSON.parse(previousData);
+						const forwardData = JSON.parse(previousData);
+						data = forwardData;	
 					} catch (error) {
 						console.log(error);
 						return;
 					}
 				}
-			})
-
+				else {
+					fs.writeFileSync(filePath, '[]');
+				}
+				data.push(task_array);
+				fs.writeFileSync(filePath,JSON.stringify(data, null , 2));
+			});
 		} else {
 			fs.writeFileSync(filePath, '[]');
-		}
+		} 
+		console.log(`New task added :  ${(task_array.taskDesc)} !`);
+	});
 
-		data = fs.readFileSync(filePath, 'utf8');
-		if (!data) {
-			data = fs.writeFileSync(filePath, `[${opsi}]`);
-		} else {
-			let prevdata = [];
-			prevdata = JSON.parse(data);
-			let notes = JSON.parse(opsi);
-			prevdata.push(notes);
-			notes = prevdata;
-			fs.writeFileSync(filePath, JSON.stringify(notes, null, 2));
-		}
-		
-		
-		console.log(`New task added :  ${(arg)} !`);
-	})
-	.option('-d, --done', 'done a task')
-	.option('-l, --list', 'list all tasks', () => {
+program
+	.command('list')
+	.description('List all tasks')
+	.action(() => {
+		console.log('Tasks : ');
 		let data = fs.readFileSync(filePath, 'utf8');
 		if (!data) {
 			return console.log("data kosong, tidak ada task ");
@@ -68,9 +67,65 @@ program
 			let notes = JSON.parse(data);
 			console.log(notes);
 		}
-	
-	})
-	.option('-u, --update', 'update a task');
+	});
+
+program
+	.command('done <id>')
+	.description('Delete/Done a task')
+	.action((id) => {
+		let data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		}
+		else{
+			let notes = JSON.parse(data);
+			notes = notes.filter((task) => task.id !== id);
+			fs.writeFileSync(filePath,JSON.stringify(notes, null , 2));
+			console.log(`Task deleted :  ${(id)} !`);
+		}
+	});
+
+program
+	.command('update <id>')
+	.description('Update a task')
+	.action((id) => {
+		let data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		}
+		else{
+			let notes = JSON.parse(data);
+			const idArray = notes.find(item => item.id === id);
+			console.log(idArray);		
+			if (idArray) {
+				input.question(`What is your task status? `, (answer) => {
+					if (answer === 'todo') {
+						idArray.status = 'todo';
+						idArray.updatedAt = new Date().toISOString();
+						idArray.completed = false;
+					} else if (answer === 'done') {
+						idArray.status = 'done';
+						idArray.updatedAt = new Date().toISOString();
+						idArray.completed = !idArray.completed;
+					} else if (answer === 'in-progress') {
+						idArray.status = 'in-progress';
+						idArray.updatedAt = new Date().toISOString();
+						idArray.completed = false;
+					} else {
+						console.log("Input Not Valid");
+						
+					}
+					input.close();
+					fs.writeFileSync(filePath,JSON.stringify(notes, null , 2));
+					console.log(`Task updated :  ${(idArray.status)} !`);
+				});
+				
+			} else {
+				console.log(`Task dengan id ${id} tidak ditemukan`);
+			}
+			
+			
+		};
+	});
 
 program.parse(process.argv);
-input.close();

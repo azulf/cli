@@ -1,1 +1,26 @@
-["akhirnya aku bisa"]
+[
+  {
+    "id": "1",
+    "taskDesc": "Task Dimulai",
+    "status": "todo",
+    "createdAt": "2024-09-02T12:24:36.713Z",
+    "updatedAt": null,
+    "completed": false
+  },
+  {
+    "id": "2",
+    "taskDesc": "Task Mengalami masalah",
+    "status": "todo",
+    "createdAt": "2024-09-02T12:24:47.199Z",
+    "updatedAt": "2024-09-02T14:17:26.197Z",
+    "completed": false
+  },
+  {
+    "id": "3",
+    "taskDesc": "Task Berhenti",
+    "status": "todo",
+    "createdAt": "2024-09-02T12:24:59.670Z",
+    "updatedAt": null,
+    "completed": false
+  }
+]
