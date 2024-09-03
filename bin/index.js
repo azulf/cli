@@ -57,16 +57,38 @@ program
 program
 	.command('list')
 	.description('List all tasks')
-	.action(() => {
-		console.log('Tasks : ');
+	.option('-d, --done', 'List all tasks that are done')
+	.option('-p, --progress', 'List all tasks that are in progress')
+	.option('-n, --notdone', 'List all tasks that are not done')
+	.option('-a, --all', 'List all tasks')
+	// .conflicts('done', 'progress')
+	// .conflicts('done', 'notdone')
+	// .conflicts('done', 'all')
+	.action((options) => {
 		let data = fs.readFileSync(filePath, 'utf8');
+		let notes = JSON.parse(data);
 		if (!data) {
 			return console.log("data kosong, tidak ada task ");
 		}
-		else{
-			let notes = JSON.parse(data);
+		if (options.all){
+			console.log('Tasks : ');
 			console.log(notes);
 		}
+		if (options.done){
+			notes = notes.filter((task) => task.completed === true);
+			console.log(notes);
+		}
+		if (options.progress)
+		{
+			notes = notes.filter((task) => task.completed === false);
+			console.log(notes);
+		}
+		if (options.notdone)
+		{
+			notes = notes.filter((task) => task.completed === false);
+			console.log(notes);
+		}
+		input.close();
 	});
 
 program
