@@ -57,16 +57,38 @@ program
 program
 	.command('list')
 	.description('List all tasks')
-	.action(() => {
-		console.log('Tasks : ');
+	.option('-d, --done', 'List all tasks that are done')
+	.option('-p, --progress', 'List all tasks that are in progress')
+	.option('-n, --notdone', 'List all tasks that are not done')
+	.option('-a, --all', 'List all tasks')
+	// .conflicts('done', 'progress')
+	// .conflicts('done', 'notdone')
+	// .conflicts('done', 'all')
+	.action((options) => {
 		let data = fs.readFileSync(filePath, 'utf8');
+		let notes = JSON.parse(data);
 		if (!data) {
 			return console.log("data kosong, tidak ada task ");
 		}
-		else{
-			let notes = JSON.parse(data);
+		if (options.all){
+			console.log('Tasks : ');
 			console.log(notes);
 		}
+		if (options.done){
+			notes = notes.filter((task) => task.completed === true);
+			console.log(notes);
+		}
+		if (options.progress)
+		{
+			notes = notes.filter((task) => task.completed === false);
+			console.log(notes);
+		}
+		if (options.notdone)
+		{
+			notes = notes.filter((task) => task.completed === false);
+			console.log(notes);
+		}
+		input.close();
 	});
 
 program
@@ -87,7 +109,7 @@ program
 
 program
 	.command('update <id>')
-	.description('Update a task')
+	.description('Update status a task')
 	.action((id) => {
 		let data = fs.readFileSync(filePath, 'utf8');
 		if (!data) {
@@ -98,7 +120,7 @@ program
 			const idArray = notes.find(item => item.id === id);
 			console.log(idArray);		
 			if (idArray) {
-				input.question(`What is your task status? `, (answer) => {
+				input.question(`What status do you want to update ? `, (answer) => {
 					if (answer === 'todo') {
 						idArray.status = 'todo';
 						idArray.updatedAt = new Date().toISOString();
@@ -127,5 +149,31 @@ program
 			
 		};
 	});
+
+program
+	.command('mark <id> <markOption>')
+	.description('Mark a task as in progress or done')
+	.action((id, markOption) => {
+		let mark = JSON.parse(markOption);
+		let data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		} else{
+			let notes = JSON.parse(data);
+			const idArray = notes.find(item => item.id === id);
+			if (idArray) {
+				if (markOption === 'true' || markOption === 'false')
+				{
+					idArray.completed = mark;
+					idArray.updatedAt = new Date().toISOString();
+				}
+				fs.writeFileSync(filePath,JSON.stringify(notes, null , 2));
+				console.log(notes);
+				// console.log(`Task ${(idArray.taskDesc)} mark as :  ${(idArray.markOption)} !`);
+			}
+		};
+		input.close();
+	});
+
 
 program.parse(process.argv);

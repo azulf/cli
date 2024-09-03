@@ -4,8 +4,8 @@
     "taskDesc": "Task Dimulai",
     "status": "todo",
     "createdAt": "2024-09-02T12:24:36.713Z",
-    "updatedAt": null,
-    "completed": false
+    "updatedAt": "2024-09-03T01:16:12.433Z",
+    "completed": true
   },
   {
     "id": "2",
@@ -20,7 +20,7 @@
     "taskDesc": "Task Berhenti",
     "status": "todo",
     "createdAt": "2024-09-02T12:24:59.670Z",
-    "updatedAt": null,
-    "completed": false
+    "updatedAt": "2024-09-03T01:16:18.286Z",
+    "completed": true
   }
 ]
