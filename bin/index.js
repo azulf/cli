@@ -87,7 +87,7 @@ program
 
 program
 	.command('update <id>')
-	.description('Update a task')
+	.description('Update status a task')
 	.action((id) => {
 		let data = fs.readFileSync(filePath, 'utf8');
 		if (!data) {
@@ -98,7 +98,7 @@ program
 			const idArray = notes.find(item => item.id === id);
 			console.log(idArray);		
 			if (idArray) {
-				input.question(`What is your task status? `, (answer) => {
+				input.question(`What status do you want to update ? `, (answer) => {
 					if (answer === 'todo') {
 						idArray.status = 'todo';
 						idArray.updatedAt = new Date().toISOString();
@@ -127,5 +127,31 @@ program
 			
 		};
 	});
+
+program
+	.command('mark <id> <markOption>')
+	.description('Mark a task as in progress or done')
+	.action((id, markOption) => {
+		let mark = JSON.parse(markOption);
+		let data = fs.readFileSync(filePath, 'utf8');
+		if (!data) {
+			return console.log("data kosong, tidak ada task ");
+		} else{
+			let notes = JSON.parse(data);
+			const idArray = notes.find(item => item.id === id);
+			if (idArray) {
+				if (markOption === 'true' || markOption === 'false')
+				{
+					idArray.completed = mark;
+					idArray.updatedAt = new Date().toISOString();
+				}
+				fs.writeFileSync(filePath,JSON.stringify(notes, null , 2));
+				console.log(notes);
+				// console.log(`Task ${(idArray.taskDesc)} mark as :  ${(idArray.markOption)} !`);
+			}
+		};
+		input.close();
+	});
+
 
 program.parse(process.argv);
